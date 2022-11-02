@@ -24,3 +24,5 @@ async def proceed_title(message: types.Message, state: FSMContext):
     await state.update_data(title=message.text)
     search_input = await state.get_data()
     await bot.send_message(chat_id="5749956628", text=search_input['title'])
+    search_input.clear()
+    await state.clear()
