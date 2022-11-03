@@ -1,10 +1,11 @@
-from config import bot, dp
+from config import bot
 import aiogram
 from aiogram.filters.command import Command
 from aiogram import Router, types
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
-
+from database import add_user, check_user
+from keyboards.parsing import create_main_menu
 start_router = Router()
 
 
@@ -14,15 +15,6 @@ class Search(StatesGroup):
 
 @start_router.message(Command(commands=["start"]))
 async def start(message: types.Message, state: FSMContext):
-    await state.set_state(Search.chat_title)
-    await bot.send_message(chat_id=message.from_user.id, text="Введи название чата/канала")
-    await state.set_state(Search.chat_title)
-
-
-@start_router.message(Search.chat_title, aiogram.F.text)
-async def proceed_title(message: types.Message, state: FSMContext):
-    await state.update_data(title=message.text)
-    search_input = await state.get_data()
-    await bot.send_message(chat_id="5749956628", text=search_input['title'])
-    search_input.clear()
-    await state.clear()
+    if not check_user(message):
+        add_user("parser", message)
+    await bot.send_message(message.from_user.id, "Выбери что нужно сделать:", reply_markup=create_main_menu())
